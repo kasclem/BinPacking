@@ -81,11 +81,13 @@ public class VNS extends Algorithm {
     ShakingOperator[] shakings = new ShakingOperator[]{n1, n2, n3};
 
     // sort by increasing used capacity
-    static Comparator<Bin> l1_comparator = new Comparator<Bin>() {
+    static StateComparator<Bin> l1_comparator = new StateComparator<Bin>() {
         @Override
         public int compare(Bin o1, Bin o2) {
-            int o1C = o1.usedCapacity;
-            int o2C = o2.usedCapacity;
+            BinState b1 = this.state.binStates.get(o1.id);
+            BinState b2 = this.state.binStates.get(o2.id);
+            int o1C = b1.usedCapacity;
+            int o2C = b2.usedCapacity;
             if( o1C > o2C ){
                 return 1;
             }else if ( o1C < o2C ){
@@ -129,6 +131,7 @@ public class VNS extends Algorithm {
     static State L1(State state){
         // todo: maybe, this is not needed here:
         toMove.clear();
+        l1_comparator.setState(state);
         state.currentBins.sort(l1_comparator);
         int binSize = state.currentBins.size();
         for(int i=0 ; i<binSize ; i++){
