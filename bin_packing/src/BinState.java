@@ -12,4 +12,9 @@ public class BinState {
 	public BinState(Bin bin){
 	    this.bin = bin;
     }
+
+    public int getBinMerit() {
+	    int answer = this.bin.weightCapacity - 2 * this.usedCapacity;
+	    return answer;
+    }
 }

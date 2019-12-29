@@ -34,11 +34,13 @@ public class ABFD extends Algorithm {
     };
 
     //sort decreasing bin merit. bin_merit = bin.free_space - bin.used_space
-    static Comparator<Bin> abfd_best_bin_sort = new Comparator<Bin>() {
+    static StateComparator<Bin> abfdBestBinSort = new StateComparator<Bin>() {
         @Override
         public int compare(Bin o1, Bin o2) {
-            int o1_merit = o1.getBinMerit();
-            int o2_merit = o2.getBinMerit();
+            BinState b1 = this.state.binStates.get(o1.id);
+            BinState b2 = this.state.binStates.get(o2.id);
+            int o1_merit = b1.getBinMerit();
+            int o2_merit = b2.getBinMerit();
 
             // should not return 0 because bins with same bin_merit will not be included. TreeSet behavior
             if(o1_merit > o2_merit){
@@ -51,7 +53,8 @@ public class ABFD extends Algorithm {
 
     @Override
     public State pack() {
-        currentBins = new TreeSet<>(abfd_best_bin_sort);
+        abfdBestBinSort.setState(this.state);
+        currentBins = new TreeSet<>(abfdBestBinSort);
         //currentBins = new LinkedList<Bin>();
         Collections.sort(this.state.itemsToInsert, ABFD.abfd_sort);
         Collections.sort(this.state.incomingBins, ABFD.abfd_bin_sort);
