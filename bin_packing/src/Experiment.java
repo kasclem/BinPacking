@@ -1,4 +1,3 @@
-import com.rits.cloning.Cloner;
 
 public class Experiment {
 	public State state;
