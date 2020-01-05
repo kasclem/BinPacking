@@ -14,7 +14,7 @@ public class Playground {
         ffcd.setState(state);
         ffcd.pack();
 
-        Swap swap = new Swap(first, second);
+        Swap swap = new Swap(first, second, state);
         System.out.println(swap.fitnessImprovement1());
     }
 }

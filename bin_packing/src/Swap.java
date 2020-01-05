@@ -24,11 +24,14 @@ public class Swap {
 
 
     public void performSwap(){
-        Bin firstBin = first.bin;
-        Bin secondBin = second.bin;
+        Bin firstBin = state.itemBinList.get(first.id);
+        Bin secondBin = state.itemBinList.get(second.id);
 
-        first.detachFromBin();
-        second.detachFromBin();
+        state.detachFromBin(first);
+        state.detachFromBin(second);
+
+        state.itemsToInsert.poll();
+        state.itemsToInsert.poll();
 
         state.insert(secondBin, first);
         state.insert(firstBin, second);
@@ -37,29 +40,33 @@ public class Swap {
 
     //VNS swapping
     public boolean canSwap(){
+        boolean response = true;
         if( fitnessImprovement1() <= 0 ){
             return false;
         }
-        Bin firstBin = first.bin;
-        Bin secondBin = second.bin;
+        Bin firstBin = state.itemBinList.get(first.id);
+        Bin secondBin = state.itemBinList.get(second.id);
 
         //detach first as swapping might fail if not done this first, because of incompatibility
-        first.detachFromBin();
-        second.detachFromBin();
+        state.detachFromBin(first);
+        state.detachFromBin(second);
 
-        if( !secondBin.canInsert(first) ) return false;
-        if( !firstBin.canInsert(second) ) return false;
+        state.itemsToInsert.poll();
+        state.itemsToInsert.poll();
+
+        if( !state.canInsert(secondBin, first) ) response = false;
+        if( !state.canInsert(firstBin, second)) response = false;
 
         // reinsert detached bins
         state.insert(firstBin, first);
         state.insert(secondBin, second);
-        return true;
+        return response;
     }
 
 
     public int fitnessImprovement1(){
-        Bin firstBin = first.bin;
-        Bin secondBin = second.bin;
+        BinState firstBin = state.getBinState(first.id);
+        BinState secondBin = state.getBinState(second.id);
         
         // DeltaTo computation
         int x = secondBin.usedCapacity;

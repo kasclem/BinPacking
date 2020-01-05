@@ -4,6 +4,10 @@ public class VNS extends Algorithm {
 
     static Algorithm ffcd = new FFCD();
 
+    public VNS(){
+        this.name = "VNS";
+    }
+
     static ShakingOperator n1 = new ShakingOperator("N1") {
         @Override
         public State operate(State state) {
@@ -22,13 +26,13 @@ public class VNS extends Algorithm {
 
 
     private static void detachItemFromBin(Item i, State state) {
-        Bin bin = i.bin;
-        if (bin.size() <= 1){
-            state.currentBins.remove(bin);
-            state.incomingBins.addFirst(bin);
+        Bin bin = state.itemBinList.get(i.id);
+        BinState binState = state.binStates.get(bin.id);
+        if (binState.size() <= 1){
+            state.currentBins.remove(binState);
+            state.incomingBins.addFirst(binState);
         }
-        i.detachFromBin();
-        state.itemsToInsert.addFirst(i);
+        state.detachFromBin(i);
     }
 
     static ShakingOperator n2 = new ShakingOperator("N2") {
@@ -38,9 +42,6 @@ public class VNS extends Algorithm {
             Category selected = Category.all.get(index);
             for(Item i : selected.members){
                 VNS.detachItemFromBin(i, state);
-
-                //todo: remove when finish debugging
-                System.out.println();
             }
 
             // pick again but different category
@@ -70,8 +71,8 @@ public class VNS extends Algorithm {
             for(Integer i_curr : chosenIndexes){
                 toRemove.addFirst(state.currentBins.get(i_curr));
             }
-            for(Bin bin : toRemove){
-                VNS.emptyBin(state, bin);
+            for(BinState binState : toRemove){
+                state.clearBin(binState.bin);
             }
             ffcd.setState(state);
             State response = ffcd.pack();
@@ -81,13 +82,11 @@ public class VNS extends Algorithm {
     ShakingOperator[] shakings = new ShakingOperator[]{n1, n2, n3};
 
     // sort by increasing used capacity
-    static StateComparator<Bin> l1_comparator = new StateComparator<Bin>() {
+    static StateComparator<BinState> l1_comparator = new StateComparator<BinState>() {
         @Override
-        public int compare(Bin o1, Bin o2) {
-            BinState b1 = this.state.binStates.get(o1.id);
-            BinState b2 = this.state.binStates.get(o2.id);
-            int o1C = b1.usedCapacity;
-            int o2C = b2.usedCapacity;
+        public int compare(BinState o1, BinState o2) {
+            int o1C = o1.usedCapacity;
+            int o2C = o2.usedCapacity;
             if( o1C > o2C ){
                 return 1;
             }else if ( o1C < o2C ){
@@ -100,34 +99,35 @@ public class VNS extends Algorithm {
 
     // l1 helper, returns false if move is not performed
     // Note: We want to prioritize: item weight larger, to residue smaller, from residue larger
-    static boolean canMove(Bin from, Bin to, Item item){
+    static boolean canMove(State state, Bin from, Bin to, Item item, boolean checkToMove){
         /*
         the residual capacity of bin iB after the move is smaller than the
         residual capacity of bin iA before the move;
         */
-        boolean cond1 = ( to.residualCapacity()-item.weight ) < from.residualCapacity();
+        int reservedWeight = 0;
+        if(checkToMove){
+            for(Item toMoveItem : toMove){
+                reservedWeight+=toMoveItem.weight;
+            }
+        }
+        boolean cond1 = ( state.residualCapacity(to)-item.weight - reservedWeight) < state.residualCapacity(from)+reservedWeight;
         if (!cond1) return false;
-        if (!to.canInsert(item)) return false;
+        if (!state.canInsert(to, item, reservedWeight)) return false;
         return true;
-    }
-
-    static void move(Item item, Bin to, State state){
-        item.detachFromBin();
-        state.insert(to, item);
     }
 
     //objective score
     static int fitnessFunction(State state){
         int score = 0;
-        for( Bin bin : state.currentBins ){
-            score += bin.usedCapacity * bin.usedCapacity;
+        for( BinState binState : state.currentBins ){
+            score += binState.usedCapacity * binState.usedCapacity;
         }
         return score;
     }
 
     //1.) sort bins by descending residual capacity
     static LinkedList<Item> toMove = new LinkedList<>();
-    static LinkedList<Bin> toRemove = new LinkedList<>();
+    static LinkedList<BinState> toRemove = new LinkedList<>();
     static State L1(State state){
         // todo: maybe, this is not needed here:
         toMove.clear();
@@ -135,19 +135,19 @@ public class VNS extends Algorithm {
         state.currentBins.sort(l1_comparator);
         int binSize = state.currentBins.size();
         for(int i=0 ; i<binSize ; i++){
-            Bin fromBin = state.currentBins.get(i);
+            BinState fromBin = state.currentBins.get(i);
             for(int j=i+1 ; j<binSize ; j++){
-                Bin toBin = state.currentBins.get(j);
+                BinState toBin = state.currentBins.get(j);
 
                 // put items in queue first because moving immediately mutates the one we're iterating on
                 for(Item item : fromBin.items){
-                    if ( VNS.canMove(fromBin, toBin, item) ) toMove.addLast(item);
+                    if ( VNS.canMove(state, fromBin.bin, toBin.bin, item, true) ) toMove.addLast(item);
                 }
 
                 //move the ones stored in queue
                 while(!toMove.isEmpty()){
                     Item item = toMove.pollFirst();
-                    VNS.move(item, toBin, state);
+                    state.move(item, toBin.bin);
                 }
             }
         }
@@ -158,13 +158,13 @@ public class VNS extends Algorithm {
 
     private static void removeEmptyBins(State state) {
         toRemove.clear();
-        for(Bin bin : state.currentBins){
+        for(BinState bin : state.currentBins){
             if(bin.usedCapacity == 0){
                 toRemove.addFirst(bin);
             }
         }
         while(!toRemove.isEmpty()){
-            Bin bin = toRemove.pollFirst();
+            BinState bin = toRemove.pollFirst();
             state.currentBins.remove(bin);
             state.incomingBins.addFirst(bin);
         }
@@ -177,8 +177,10 @@ public class VNS extends Algorithm {
             int o2Val = o2.fitnessImprovement1();
             if(o1Val>o2Val){
                 return -1;
-            }else{
+            }else if(o1Val<o2Val){
                 return 1;
+            }else{
+                return 0;
             }
         }
     };
@@ -203,20 +205,22 @@ public class VNS extends Algorithm {
                 swapQueue.offer(newSwap);
             }
         }
-        try{
-            Collections.sort(swapQueue, swapComparator);
-        }catch (IllegalArgumentException e){
-            e.printStackTrace();
-        }
+
+        Collections.sort(swapQueue, swapComparator);
+
 
 
         while( !swapQueue.isEmpty() ){
             Swap curr = swapQueue.pollFirst();
-            Bin firstBin = curr.first.bin;
-            Bin secondBin = curr.second.bin;
+
+            Bin firstBin = state.itemBinList.get(curr.first.id);
+            Bin secondBin = state.itemBinList.get(curr.second.id);
+
             if( swappedBins.contains(firstBin.id) || swappedBins.contains(secondBin.id) ){
                 continue;
             }
+
+
             if( curr.canSwap() ){
                 //todo: remove once verified. stop using canSwap too.
                 int origFitness = VNS.fitnessFunction(state);
@@ -233,13 +237,6 @@ public class VNS extends Algorithm {
         swapQueue.clear();
         swappedBins.clear();
         return state;
-    }
-
-    static void emptyBin(State state, Bin bin){
-        state.itemsToInsert.addAll(bin.items);
-        state.clearBin(bin);
-        state.currentBins.remove(bin);
-        state.incomingBins.addFirst(bin);
     }
 
     static int N3GetBinCount(int binCount){
@@ -270,7 +267,7 @@ public class VNS extends Algorithm {
         this.resetScores();
         ffcd.setState(state);
         State initState = ffcd.pack();
-        State currentSolution = Utils.c.deepClone(initState);
+        State currentSolution = initState.clone();
         State best = initState;
 
         while(!VNS.shouldStop(totalCtr, noImprovementCtr)){
@@ -279,7 +276,9 @@ public class VNS extends Algorithm {
             //todo: remove after debug
             h = VNS.n2;
 
+
             currentSolution = h.operate(currentSolution);
+
             currentSolution = VNS.L1(currentSolution);
             currentSolution = VNS.L2(currentSolution);
             if(VNS.hasImprovement(best, currentSolution)){
@@ -289,10 +288,14 @@ public class VNS extends Algorithm {
             }else{
                 noImprovementCtr++;
             }
-            currentSolution = Utils.c.deepClone(best);
+//            if(currentSolution.currentBins.size() < min){
+//                min = currentSolution.currentBins.size();
+//            }
+//            System.out.println(min);
+            currentSolution = best.clone();
             totalCtr++;
         }
-        return this.state;
+        return best;
     }
 
     private static boolean hasImprovement(State best, State currentSolution) {

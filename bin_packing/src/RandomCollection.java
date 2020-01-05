@@ -8,7 +8,7 @@ public class RandomCollection<E> {
     private double total = 0;
 
     public RandomCollection() {
-        this(new Random(2));
+        this.random = Utils.r;
     }
 
     public RandomCollection(Random random) {

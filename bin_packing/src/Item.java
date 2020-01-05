@@ -7,11 +7,10 @@ public class Item {
 	public int id;
 	public Category c;
 	public int weight;
-	public Bin bin;
 
 	public Item() {
-		Item.all.add(this);
 		this.id = Item.all.size();
+		Item.all.add(this);
 	}
 
     public static Item createItem(int weight, int category) {
@@ -21,16 +20,6 @@ public class Item {
 		item.c.members.add(item);
 		return item;
     }
-
-    //todo: make sure item is brought back to item to insert
-    public void detachFromBin() {
-		if(bin==null){
-			return;
-		}
-		bin.remove(this);
-		bin = null;
-	}
-
 
 	public static Item generateRandom() {
 		Item item = new Item();

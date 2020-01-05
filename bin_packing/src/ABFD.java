@@ -2,8 +2,12 @@ import java.util.*;
 
 public class ABFD extends Algorithm {
 
-    TreeSet<Bin> currentBins;
+    TreeSet<BinState> currentBins;
     //LinkedList<Bin> currentBins;
+
+    public ABFD(){
+        this.name = "ABFD";
+    }
 
     //sort items to insert according to non-increasing order of weight
     static Comparator<Item> abfd_sort = new Comparator<Item>() {
@@ -20,12 +24,12 @@ public class ABFD extends Algorithm {
     };
 
     //sort incoming bins according to increasing order of weight capacity
-    static Comparator<Bin> abfd_bin_sort = new Comparator<Bin>() {
+    static Comparator<BinState> abfd_bin_sort = new Comparator<BinState>() {
         @Override
-        public int compare(Bin o1, Bin o2) {
-            if(o1.weightCapacity > o2.weightCapacity){
+        public int compare(BinState o1, BinState o2) {
+            if(o1.bin.weightCapacity > o2.bin.weightCapacity){
                 return 1;
-            }else if(o1.weightCapacity < o2.weightCapacity){
+            }else if(o1.bin.weightCapacity < o2.bin.weightCapacity){
                 return -1;
             }else{
                 return 0;
@@ -34,13 +38,11 @@ public class ABFD extends Algorithm {
     };
 
     //sort decreasing bin merit. bin_merit = bin.free_space - bin.used_space
-    static StateComparator<Bin> abfdBestBinSort = new StateComparator<Bin>() {
+    static StateComparator<BinState> abfdBestBinSort = new StateComparator<BinState>() {
         @Override
-        public int compare(Bin o1, Bin o2) {
-            BinState b1 = this.state.binStates.get(o1.id);
-            BinState b2 = this.state.binStates.get(o2.id);
-            int o1_merit = b1.getBinMerit();
-            int o2_merit = b2.getBinMerit();
+        public int compare(BinState o1, BinState o2) {
+            int o1_merit = o1.getBinMerit();
+            int o2_merit = o2.getBinMerit();
 
             // should not return 0 because bins with same bin_merit will not be included. TreeSet behavior
             if(o1_merit > o2_merit){
@@ -67,18 +69,18 @@ public class ABFD extends Algorithm {
     }
 
     //best first insert
-    public static void bf_insert(TreeSet<Bin> currentBins, Item toInsert, State state){
+    public static void bf_insert(TreeSet<BinState> currentBins, Item toInsert, State state){
         //Collections.sort(currentBins, abfd_best_bin_sort);
-        Iterator<Bin> iterator = currentBins.iterator();
+        Iterator<BinState> iterator = currentBins.iterator();
         while(iterator.hasNext()){
-            Bin curr = iterator.next();
-            if(state.insert(curr, toInsert)){
+            BinState curr = iterator.next();
+            if(state.insert(curr.bin, toInsert)){
                 return;
             };
         }
 
-        Bin newBin = state.incomingBins.pollFirst();
-        state.insert(newBin, toInsert);
+        BinState newBin = state.incomingBins.pollFirst();
+        state.insert(newBin.bin, toInsert);
         currentBins.add(newBin);
         state.currentBins.add(newBin);
     }

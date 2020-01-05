@@ -3,6 +3,10 @@ import java.util.Comparator;
 
 public class FFCD extends Algorithm {
 
+	public FFCD(){
+		this.name = "FFCD";
+	}
+
 	//sorter increasing dck decreasing weight
 	static Comparator<Item> ffcd_sort =  new Comparator<Item>() {
 		@Override
@@ -15,22 +19,28 @@ public class FFCD extends Algorithm {
 				return -1;
 			}else if(o1.weight > o2.weight) {
 				return -1;
+			}else if(o1.weight < o2.weight){
+				return 1;
+			}else if(o1.id > o2.id){
+				return 1;
 			}else{
-				return 0;
+				return -1;
 			}
 		}
 	};
 
 	// todo: optimize, don't start from beginning?
 	public static void ffd(Item item, State currState) {
-		for(Bin b : currState.currentBins) {
-			if(currState.insert(b, item)){
+		for(BinState b : currState.currentBins) {
+			if(currState.insert(b.bin, item)){
 				return;
 			}
 		}
-		Bin newBin = currState.incomingBins.pollFirst();
+		BinState newBin = currState.incomingBins.pollFirst();
 		currState.currentBins.add(newBin);
-		currState.insert(newBin, item);
+
+		currState.insert(newBin.bin, item);
+
 	}
 
 	@Override

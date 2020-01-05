@@ -46,7 +46,7 @@ public class Utils {
 	//todo: on experiments use alpha=0.05 beta=0.075
 	public static final double ALPHA = 0.3;
 	public static final double BETA = 0.3;
-	public static final int ITEMS_PER_CATEGORY = 3;
+	public static int ITEMS_PER_CATEGORY = 50;
 	public static final int MIN_ITEM_WEIGHT = 4;
 	public static final int MAX_ITEM_WEIGHT = 13;
 	public static final int[] WEIGHT_CHOICES = new int[] {15, 18, 21};
@@ -55,9 +55,7 @@ public class Utils {
 	private static int numOfItems = ITEMS_PER_CATEGORY * 6; // there are 6 categories
 	public static final int LAMBDA = numOfItems/2; // based from moura-santos experiments
 	public static final int PSI = numOfItems*5; // based from moura-santos experiments
-	
 	public static Random r = new Random(2);
-	public static Cloner c = new Cloner();
 
 	// high exclusive
 	public static int randIntRange(int low, int high) {

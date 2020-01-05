@@ -5,7 +5,7 @@ public class Category {
 	public int id;
 	public ArrayList<Category> compatible = new ArrayList<Category>();
 	public ArrayList<Item> members = new ArrayList<Item>();
-	
+
 	public Category(int id) {
 		this.id = id;
 	}
