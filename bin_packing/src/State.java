@@ -1,3 +1,6 @@
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -10,6 +13,19 @@ public class State {
 	public LinkedList<BinState> incomingBins = new LinkedList<BinState>();
 	public ArrayList<Bin> itemBinList = new ArrayList<>();
 	public ArrayList<BinState> binStates = new ArrayList<>();
+
+	public void writeStateToFile(String name){
+		File file = new File(String.format("serializedFiles/%s", name));
+		FileWriter fr = null;
+
+		try {
+			fr = new FileWriter(file);
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
 
 	public static State generateState1() {
 		resetThings();
@@ -98,12 +114,11 @@ public class State {
 		Item.all.clear();
 	}
 
+
 	private static void initCategory(State state){
 		Category.init(Utils.CATEGORY_TABLE1);
 		state.compatList =  Category.all.toArray(new Category[0]);
 	}
-
-
 
 
 	@Override
@@ -116,6 +131,7 @@ public class State {
 		return string;
 	}
 
+
 	public int itemCount(){
 		int ctr = 0;
 		for(BinState bin : this.currentBins){
@@ -124,12 +140,14 @@ public class State {
 		return ctr;
 	}
 
+
 	public int residualCapacity(Bin to) {
 		BinState binState = this.binStates.get(to.id);
 		int answer = binState.residualCapacity();
 		return answer;
 	}
 
+	
 	public boolean canInsert(Bin to, Item item, int reservedWeight) {
 		BinState binState = this.binStates.get(to.id);
 		boolean answer = binState.canInsert(item, reservedWeight);

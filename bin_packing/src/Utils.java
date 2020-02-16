@@ -43,7 +43,6 @@ public class Utils {
 	//used by VNS.N3
 	//todo: on experiments use alpha=0.05 beta=0.075
 	public static final double ALPHA = 0.3;
-	public static final double BETA = 0.3;
 	public static int ITEMS_PER_CATEGORY = 50;
 	public static final int MIN_ITEM_WEIGHT = 4;
 	public static final int MAX_ITEM_WEIGHT = 13;

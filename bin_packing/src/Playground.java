@@ -1,6 +1,10 @@
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 public class Playground {
     public static void main(String[] args){
-        ex1();
+        writeUsingFileWriter("Helsdfsdflo");
     }
 
     //fitnessFunctionTry
@@ -16,5 +20,26 @@ public class Playground {
 
         Swap swap = new Swap(first, second, state);
         System.out.println(swap.fitnessImprovement1());
+    }
+
+    private static void writeUsingFileWriter(String data) {
+        File file = new File(String.format("serializedFiles/%s", "Formatted.txt"));
+        FileWriter fr = null;
+        try {
+            fr = new FileWriter(file);
+            fr.write("Start");
+            fr.append("Hello");
+            fr.append("Hello");
+            fr.append()
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally{
+            //close resources
+            try {
+                fr.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
