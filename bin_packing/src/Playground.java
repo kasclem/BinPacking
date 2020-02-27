@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class Playground {
     public static void main(String[] args){
-        writeUsingFileWriter("Helsdfsdflo");
+        smallVNS();
     }
 
     //fitnessFunctionTry
@@ -22,6 +22,21 @@ public class Playground {
         System.out.println(swap.fitnessImprovement1());
     }
 
+    static void smallFFCD(){
+        State state = State.generateState2();
+        Runner.run(new FFCD(), state);
+    }
+
+    static void smallABFD(){
+        State state = State.generateState2();
+        Runner.run(new ABFD(), state);
+    }
+
+    static void smallVNS(){
+        State state = State.generateState2();
+        Runner.run(new VNS(), state);
+    }
+
     private static void writeUsingFileWriter(String data) {
         File file = new File(String.format("serializedFiles/%s", "Formatted.txt"));
         FileWriter fr = null;
@@ -30,7 +45,7 @@ public class Playground {
             fr.write("Start");
             fr.append("Hello");
             fr.append("Hello");
-            fr.append()
+            fr.append("Hi");
         } catch (IOException e) {
             e.printStackTrace();
         }finally{

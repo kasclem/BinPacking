@@ -132,12 +132,13 @@ public class VNS extends Algorithm {
         // todo: maybe, this is not needed here:
         toMove.clear();
         l1_comparator.setState(state);
-        state.currentBins.sort(l1_comparator);
-        int binSize = state.currentBins.size();
+        ArrayList<BinState> l1_currentbins = new ArrayList<>(state.currentBins);
+        l1_currentbins.sort(l1_comparator);
+        int binSize = l1_currentbins.size();
         for(int i=0 ; i<binSize ; i++){
-            BinState fromBin = state.currentBins.get(i);
+            BinState fromBin = l1_currentbins.get(i);
             for(int j=i+1 ; j<binSize ; j++){
-                BinState toBin = state.currentBins.get(j);
+                BinState toBin = l1_currentbins.get(j);
 
                 // put items in queue first because moving immediately mutates the one we're iterating on
                 for(Item item : fromBin.items){
@@ -259,7 +260,7 @@ public class VNS extends Algorithm {
         return randomShaking.next();
     }
 
-    //todo: make sure empty bins are brought back to incoming bins once packing is over
+
     @Override
     public State pack() {
         int totalCtr = 0;
@@ -272,11 +273,6 @@ public class VNS extends Algorithm {
 
         while(!VNS.shouldStop(totalCtr, noImprovementCtr)){
             ShakingOperator h = this.chooseNeighborhood();
-
-            //todo: remove after debug
-            h = VNS.n2;
-
-
             currentSolution = h.operate(currentSolution);
 
             currentSolution = VNS.L1(currentSolution);

@@ -9,7 +9,7 @@ public class ABFD extends Algorithm {
         this.name = "ABFD";
     }
 
-    //sort items to insert according to non-increasing order of weight
+    //sort items to insert according to decreasing order of weight
     static Comparator<Item> abfd_sort = new Comparator<Item>() {
         @Override
         public int compare(Item o1, Item o2) {
@@ -47,6 +47,8 @@ public class ABFD extends Algorithm {
             // should not return 0 because bins with same bin_merit will not be included. TreeSet behavior
             if(o1_merit > o2_merit){
                 return -1;
+            }else if(o1.equals(o2)){
+                return 0;
             }else{
                 return 1;
             }
@@ -70,15 +72,23 @@ public class ABFD extends Algorithm {
 
     //best first insert
     public static void bf_insert(TreeSet<BinState> currentBins, Item toInsert, State state){
-        //Collections.sort(currentBins, abfd_best_bin_sort);
         Iterator<BinState> iterator = currentBins.iterator();
+        int max = Integer.MIN_VALUE;
+        BinState bestBin = null;
         while(iterator.hasNext()){
             BinState curr = iterator.next();
-            if(state.insert(curr.bin, toInsert)){
-                return;
-            };
+            if(curr.getBinMerit() > max){
+                if(state.canInsert(curr.bin, toInsert)){
+                    max = curr.getBinMerit();
+                    bestBin = curr;
+                }
+            }
         }
 
+        if(bestBin!=null){
+            state.insert(bestBin.bin, toInsert);
+            return;
+        }
         BinState newBin = state.incomingBins.pollFirst();
         state.insert(newBin.bin, toInsert);
         currentBins.add(newBin);

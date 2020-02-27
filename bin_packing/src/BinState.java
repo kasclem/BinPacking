@@ -78,6 +78,7 @@ public class BinState {
 
 	@Override
 	public String toString() {
+//		return String.format("[%d, %d, %s]", this.bin.weightCapacity, this.getBinMerit(), this.items);
 		return String.format("[%d, %s]", this.bin.weightCapacity, this.items);
 	}
 
@@ -91,5 +92,20 @@ public class BinState {
 		newBS.items = new LinkedList<>(this.items);
 		newBS.compatSet = new HashSet<>(this.compatSet);
 		return newBS;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		BinState binState = (BinState) o;
+
+		return this.bin.id == binState.bin.id;
+	}
+
+	@Override
+	public int hashCode() {
+		return bin.id;
 	}
 }

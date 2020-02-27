@@ -17,7 +17,11 @@ public class FFCD extends Algorithm {
 				return 1;
 			}else if(dck1<dck2) {
 				return -1;
-			}else if(o1.weight > o2.weight) {
+			}
+//			else if(o1.c.id > o2.c.id){
+//				return 1;
+//			}
+			else if(o1.weight > o2.weight) {
 				return -1;
 			}else if(o1.weight < o2.weight){
 				return 1;
