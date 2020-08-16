@@ -1,8 +1,15 @@
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
 public class Utils {
+	public static String[] VARIABLES_ARR = new String[]{"Time(s)", "Bin Count"};
+	public static String[] ALGOS_ARR = new String[]{"VNS", "ABFD", "FFCD"};
+
 	public static final int[][] CATEGORY_TABLE1 = new int[][]{
 		new int[] {1, 0, 1, 0, 0, 0}, //0
 		new int[] {0, 1, 0, 1, 1, 1}, //1
@@ -42,7 +49,7 @@ public class Utils {
 
 	//used by VNS.N3
 	//todo: on experiments use alpha=0.05 beta=0.075
-	public static final double ALPHA = 0.3;
+	public static final double ALPHA = 0.05;
 	public static int ITEMS_PER_CATEGORY = 50;
 	public static final int MIN_ITEM_WEIGHT = 4;
 	public static final int MAX_ITEM_WEIGHT = 13;
@@ -52,7 +59,7 @@ public class Utils {
 	private static int numOfItems = ITEMS_PER_CATEGORY * 6; // there are 6 categories
 	public static final int LAMBDA = numOfItems/2; // based from moura-santos experiments
 	public static final int PSI = numOfItems*5; // based from moura-santos experiments
-	public static Random r = new Random(2);
+	public static Random r = new Random();
 
 	// high exclusive
 	public static int randIntRange(int low, int high) {
@@ -79,5 +86,49 @@ public class Utils {
 
 	public static void log(){
 
+	}
+
+
+	public static int getRow(int trialCount) {
+		return trialCount + HEADER_COUNT;
+	}
+
+	// variable = (0, 1) either run_time or bin count
+	// algorithm = (0, 1, 2) either vns, abfd or ffcd
+	static int VARIABLES = 2;
+	static int ALGOS = 3;
+	public static int getCol(int i, int variable, int algorithm) {
+		return i * (VARIABLES * ALGOS + 1) + algorithm * VARIABLES + variable + 1;
+	}
+
+
+	public static final int HEADER_COUNT = 3;
+	public static void writeToCsv(ArrayList<ArrayList<String>> table) {
+		BufferedWriter br = null;
+		try {
+			br = new BufferedWriter(new FileWriter("myfile.csv"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		StringBuilder sb = new StringBuilder();
+
+		for(ArrayList<String> row : table){
+			for(String cell : row){
+				sb.append(cell);
+				sb.append(",");
+			}
+			sb.append("\n");
+		}
+
+		try {
+			br.write(sb.toString());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		try {
+			br.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

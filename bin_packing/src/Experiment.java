@@ -37,6 +37,6 @@ public class Experiment {
 
 	@Override
 	public String toString() {
-		return String.format("%s Run Time: %f, Bin Count: %d, Memory: %d", this.algo.name, this.run_time, this.binCount, this.runSize);
+		return String.format("%s Run Time: %f, Bin Count: %d", this.algo.name, this.run_time, this.binCount, this.runSize);
 	}
 }

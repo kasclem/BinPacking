@@ -24,7 +24,6 @@ public class State {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	public static State generateState1() {
@@ -137,7 +136,8 @@ public class State {
 		for(BinState bin : this.currentBins){
 			ctr+=bin.size();
 		}
-		return ctr;
+
+		return ctr + this.itemsToInsert.size();
 	}
 
 
