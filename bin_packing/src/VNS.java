@@ -244,7 +244,7 @@ public class VNS extends Algorithm {
         double alpha = Utils.ALPHA;
 
         //round-down
-        int max = (int)(alpha * binCount);
+        int max = (int)Math.ceil((alpha * binCount));
 
         // increment for round-up
         max+=1;
